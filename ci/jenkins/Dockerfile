@@ -20,9 +20,19 @@ RUN apt-get update \
 RUN npm install -g newman@6 && npm cache clean --force
 
 # Trivy (image + IaC scanning)
-ARG TRIVY_VERSION=0.56.2
-RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-      | sh -s -- -b /usr/local/bin v${TRIVY_VERSION}
+# Pinned to v0.69.3, listed as SAFE in advisory GHSA-69fq-xp46-6x23 (CVE-2026-33634,
+# March 2026 Trivy supply-chain compromise: v0.69.4 was malicious and older releases
+# were removed). The tarball is verified against the official checksum file.
+ARG TRIVY_VERSION=0.69.3
+RUN ARCH=$(dpkg --print-architecture | sed 's/amd64/64bit/; s/arm64/ARM64/') \
+ && BASE=https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION} \
+ && FILE=trivy_${TRIVY_VERSION}_Linux-${ARCH}.tar.gz \
+ && curl -sSfL -o /tmp/${FILE} ${BASE}/${FILE} \
+ && curl -sSfL -o /tmp/trivy_checksums.txt ${BASE}/trivy_${TRIVY_VERSION}_checksums.txt \
+ && cd /tmp && grep " ${FILE}$" trivy_checksums.txt | sha256sum -c - \
+ && tar -xzf /tmp/${FILE} -C /usr/local/bin trivy \
+ && rm -f /tmp/${FILE} /tmp/trivy_checksums.txt \
+ && trivy --version
 
 # Gitleaks (secret scanning)
 ARG GITLEAKS_VERSION=8.21.2
