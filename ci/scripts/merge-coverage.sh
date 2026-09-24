@@ -23,6 +23,6 @@ docker cp "$CID:/doubtfire/coverage/." reports/coverage
 
 # Paths inside the image are /doubtfire/...; rewrite them to the Jenkins
 # workspace so SonarQube and the Coverage plugin can match source files.
-sed -i "s#/doubtfire/#${WORKSPACE}/#g" reports/coverage/.resultset.json reports/coverage/coverage.xml
+sed -i "s#/doubtfire/#${WORKSPACE}/#g" reports/coverage/.resultset.json reports/coverage/coverage.xml reports/coverage/coverage.json
 sed -i "s#<source>/doubtfire</source>#<source>${WORKSPACE}</source>#g" reports/coverage/coverage.xml
 echo "Merged coverage written to reports/coverage"
