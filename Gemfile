@@ -58,7 +58,7 @@ gem 'hirb'
 gem 'devise'
 gem 'devise_ldap_authenticatable'
 gem 'json-jwt'
-gem 'ruby-saml', '~> 1.13.0'
+gem 'ruby-saml', '~> 1.18' # security: CVE-2024-45409, CVE-2025-25291/25292, CVE-2025-66567/66568
 
 # Student submission
 gem 'coderay'

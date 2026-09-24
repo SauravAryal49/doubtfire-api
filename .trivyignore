@@ -1,4 +1,20 @@
-# Trivy suppressions. EVERY entry needs a reason, a date and a review date.
-# Format:
-#   # <why this is not exploitable / accepted risk> (added YYYY-MM-DD, review YYYY-MM-DD)
-#   CVE-XXXX-YYYY
+# Trivy suppressions - reviewed 2026-09-25 (Jenkins build #4).
+# Only CRITICAL findings WITH an available fix fail the Security gate. Each entry below
+# has a reason and an expiry date (exp:) so it is re-reviewed automatically.
+
+# activestorage 7.1.3.3 - path traversal / file deletion via crafted blob keys.
+# Fix requires Rails >= 7.2.3 (major framework upgrade, upstream scope).
+# Not exploitable here: Active Storage is loaded by rails/all but never used
+# (no has_one_attached/has_many_attached, no storage service configured).
+CVE-2026-33195 exp:2026-12-31
+CVE-2026-33202 exp:2026-12-31
+
+# zlib 2.1.1 - Ruby 3.1 *default* gem shipped inside the Ruby interpreter
+# (/usr/local/lib/ruby/gems/3.1.0/specifications/default). Only fixed by upgrading
+# Ruby itself (see EOL Ruby accepted risk in config/brakeman.ignore).
+CVE-2026-27820 exp:2026-12-31
+
+# net-imap - the bundled gem is upgraded in Gemfile.lock (fixed). This entry covers
+# the unused Ruby 3.1 *default* net-imap 0.2.4 that ships with the interpreter;
+# the application loads the patched bundled version, not the default one.
+CVE-2026-42257 exp:2026-12-31

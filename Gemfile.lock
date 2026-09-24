@@ -108,7 +108,7 @@ GEM
     code_analyzer (0.5.5)
       sexp_processor
     coderay (1.1.3)
-    concurrent-ruby (1.3.1)
+    concurrent-ruby (1.3.8)
     connection_pool (2.4.1)
     crack (1.0.0)
       bigdecimal
@@ -258,7 +258,7 @@ GEM
     mysql2 (0.5.6)
     net-http (0.4.1)
       uri
-    net-imap (0.4.12)
+    net-imap (0.5.15)
       date
       net-protocol
     net-ldap (0.19.0)
@@ -270,9 +270,9 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.7.3)
-    nokogiri (1.16.5-aarch64-linux)
+    nokogiri (1.18.10-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.16.5-x86_64-linux)
+    nokogiri (1.18.10-x86_64-linux-gnu)
       racc (~> 1.4)
     observer (0.1.2)
     orm_adapter (0.5.0)
@@ -300,7 +300,8 @@ GEM
       rack (>= 0.4)
     rack-cors (2.0.2)
       rack (>= 2.0.0)
-    rack-session (2.0.0)
+    rack-session (2.1.2)
+      base64 (>= 0.1.0)
       rack (>= 3.0.0)
     rack-test (2.1.0)
       rack (>= 1.3)
@@ -408,15 +409,15 @@ GEM
       rubocop (>= 1.33.0, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
     ruby-filemagic (0.7.3)
-    ruby-lsp (0.17.1)
+    ruby-lsp (0.17.2)
       language_server-protocol (~> 3.17.0)
       prism (>= 0.29.0, < 0.30)
       sorbet-runtime (>= 0.5.10782)
     ruby-ole (1.2.13.1)
     ruby-progressbar (1.13.0)
     ruby-rc4 (0.1.5)
-    ruby-saml (1.13.0)
-      nokogiri (>= 1.10.5)
+    ruby-saml (1.18.1)
+      nokogiri (>= 1.13.10)
       rexml
     ruby2_keywords (0.0.5)
     rubyzip (1.3.0)
@@ -550,7 +551,7 @@ DEPENDENCIES
   rubocop-rails
   ruby-filemagic
   ruby-lsp
-  ruby-saml (~> 1.13.0)
+  ruby-saml (~> 1.18)
   rubyzip
   shellwords
   sidekiq

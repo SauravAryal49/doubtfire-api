@@ -1,5 +1,45 @@
-# Gitleaks false positives / accepted findings. Add the "Fingerprint" value from
-# the gitleaks report, one per line, with a comment explaining why.
-# Example:
-#   # test-only key used by docker-compose.yml for local development (not a real secret)
-#   <commit>:docker-compose.yml:generic-api-key:32
+# Gitleaks triage - reviewed 2026-09-25 (Jenkins build #4, 20 findings in 4,440 commits).
+# All 20 findings are historic upstream OnTrack/Doubtfire commits (2012-2022) containing
+# development/test-only keys. None are used by this pipeline's staging or production,
+# whose secrets are generated per environment and injected from Jenkins credentials.
+# Mitigation: production secrets rotated (new random values), never committed.
+# Any NEW secret in a future commit is NOT in this list and fails the Security gate.
+# Format: <commit>:<file>:<rule>:<line>
+
+# .github/workflows/push.yml: CI-only test keys for the throwaway GitHub Actions test DB (DF_SECRET_KEY_* / DF_ENCRYPTION_* test values). Never used in staging/production.
+cce4487eb4c02b6a080c5ad72dbe343dfc3a24ad:.github/workflows/push.yml:generic-api-key:19
+cce4487eb4c02b6a080c5ad72dbe343dfc3a24ad:.github/workflows/push.yml:generic-api-key:20
+8f9a51b801055fc1809ba70d911c868a3f30b01f:.github/workflows/push.yml:generic-api-key:29
+8f9a51b801055fc1809ba70d911c868a3f30b01f:.github/workflows/push.yml:generic-api-key:29
+99541bce94cd1f8626c531fa6aa09dd27447639c:.github/workflows/push.yml:generic-api-key:20
+99541bce94cd1f8626c531fa6aa09dd27447639c:.github/workflows/push.yml:generic-api-key:20
+
+# test/helpers/json_helper.rb: Dummy value inside a unit-test helper; not a real credential.
+8a38f0df1d8cad12c7ea7db3adfcc5f35fac9f08:test/helpers/json_helper.rb:generic-api-key:28
+
+# config/environments/experimental.rb: Rails secret_token in an environment file deleted upstream; not used by any deployed environment.
+8acee81c29e3accfdebf76c5fa49dea679b7c699:config/environments/experimental.rb:generic-api-key:7
+8acee81c29e3accfdebf76c5fa49dea679b7c699:config/environments/experimental.rb:generic-api-key:8
+
+# config/environments/replica.rb: Rails secret_token in an environment file deleted upstream; not used by any deployed environment.
+baa6f68a85e4cd7f9f7823a802d1a69c2bc5aff4:config/environments/replica.rb:generic-api-key:6
+baa6f68a85e4cd7f9f7823a802d1a69c2bc5aff4:config/environments/replica.rb:generic-api-key:7
+
+# config/environments/development.rb: Historic development-only secret_token (2014), since replaced by ENV-based DF_SECRET_KEY_*.
+64465f50d06e082166e0155109edc462bd7d33a0:config/environments/development.rb:generic-api-key:7
+64465f50d06e082166e0155109edc462bd7d33a0:config/environments/development.rb:generic-api-key:8
+174721166623973f8991ea6043ed514913870ecb:config/environments/development.rb:generic-api-key:46
+1c1f35c20d28a395094738a0dc34a562880e1a97:config/environments/development.rb:generic-api-key:46
+
+# config/initializers/session_store.rb: Historic session secret (2014) in a file later removed; production now reads DF_SECRET_KEY_BASE from the environment.
+64465f50d06e082166e0155109edc462bd7d33a0:config/initializers/session_store.rb:generic-api-key:9
+f9f8f71de3f74d22675f70bfe0f58b373ce20907:config/initializers/session_store.rb:generic-api-key:9
+
+# config/environments/test.rb: Historic test-only secret_token (2014); test environment only.
+174721166623973f8991ea6043ed514913870ecb:config/environments/test.rb:generic-api-key:37
+
+# config/initializers/devise.rb: Historic Devise pepper (2014); Devise secret now comes from DF_SECRET_KEY_DEVISE env var.
+7701e30df728b3fc1fbd83d6aa5abb0e952c7fb3:config/initializers/devise.rb:generic-api-key:238
+
+# config/initializers/secret_token.rb: Rails 3 secret_token from the 2012 initial commit; file removed upstream.
+6bbcedcdda2888aac5be021efb2b29c033c13bfb:config/initializers/secret_token.rb:generic-api-key:7

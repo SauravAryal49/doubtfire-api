@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 # Add Docker + Redis apt repositories using signed keyrings
 # (apt-key / add-apt-repository no longer work on Debian 12 "bookworm")
 RUN apt-get update \
+  && apt-get upgrade -y \
   && apt-get install -y ca-certificates curl gnupg \
   && install -m 0755 -d /etc/apt/keyrings \
   && CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")" \
@@ -39,7 +40,11 @@ RUN apt-get update \
 WORKDIR /doubtfire
 
 COPY ./.ci-setup/ /doubtfire/.ci-setup/
-RUN ./.ci-setup/texlive-install.sh
+# Security: TeX Live bundles optional Java helper tools (arara, tlcockpit, texplate,
+# latex2nemeth) that ship jackson-databind 2.9.4 (21 critical CVEs). OnTrack only
+# uses lualatex for PDF generation, so the unused .jar files are removed.
+RUN ./.ci-setup/texlive-install.sh \
+  && find /tmp/texlive -name '*.jar' -delete
 ENV PATH /tmp/texlive/bin/x86_64-linux:/tmp/texlive/bin/aarch64-linux:$PATH
 
 RUN gem install bundler -v '2.4.5'
