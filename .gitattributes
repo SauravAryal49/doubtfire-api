@@ -1,2 +1,7 @@
 # Set the default behavior, in case people don't have core.autocrlf set.
 * text=auto eol=lf
+
+# Pipeline scripts/configs must keep Unix line endings (Windows checkouts)
+*.sh text eol=lf
+Jenkinsfile text eol=lf
+ci/** text eol=lf

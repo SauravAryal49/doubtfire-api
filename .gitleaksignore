@@ -1,0 +1,5 @@
+# Gitleaks false positives / accepted findings. Add the "Fingerprint" value from
+# the gitleaks report, one per line, with a comment explaining why.
+# Example:
+#   # test-only key used by docker-compose.yml for local development (not a real secret)
+#   <commit>:docker-compose.yml:generic-api-key:32

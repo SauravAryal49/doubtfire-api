@@ -1,0 +1,4 @@
+# Trivy suppressions. EVERY entry needs a reason, a date and a review date.
+# Format:
+#   # <why this is not exploitable / accepted risk> (added YYYY-MM-DD, review YYYY-MM-DD)
+#   CVE-XXXX-YYYY

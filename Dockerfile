@@ -1,14 +1,19 @@
-FROM ruby:3.1-bullseye
+FROM ruby:3.1-bookworm
 
 # DEBIAN_FRONTEND=noninteractive is required to install tzdata in non interactive way
 ENV DEBIAN_FRONTEND noninteractive
 
+# Add Docker + Redis apt repositories using signed keyrings
+# (apt-key / add-apt-repository no longer work on Debian 12 "bookworm")
 RUN apt-get update \
-  && apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common \
-  && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
-  && add-apt-repository "deb [arch=amd64,arm64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
+  && apt-get install -y ca-certificates curl gnupg \
+  && install -m 0755 -d /etc/apt/keyrings \
+  && CODENAME="$(. /etc/os-release && echo "$VERSION_CODENAME")" \
+  && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+  && chmod a+r /etc/apt/keyrings/docker.asc \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian ${CODENAME} stable" > /etc/apt/sources.list.d/docker.list \
   && curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg \
-  && echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
+  && echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb ${CODENAME} main" > /etc/apt/sources.list.d/redis.list
 
 RUN apt-get update \
   && apt-get install -y \

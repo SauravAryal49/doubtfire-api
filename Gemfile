@@ -26,6 +26,8 @@ group :development, :test do
   gem 'rubocop-rails'
   gem 'ruby-lsp'
   gem 'simplecov', require: false
+  gem 'simplecov-cobertura', require: false   # CI: coverage XML for Jenkins
+  gem 'minitest-reporters', require: false    # CI: JUnit XML test reports
   gem 'solargraph'
   gem 'sprockets-rails'
 end

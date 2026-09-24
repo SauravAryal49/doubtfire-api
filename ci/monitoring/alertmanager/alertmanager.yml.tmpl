@@ -1,0 +1,24 @@
+route:
+  receiver: discord
+  group_by: [alertname, env]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 2h
+  routes:
+    - matchers: ['severity="critical"']
+      receiver: discord
+      repeat_interval: 15m
+
+receivers:
+  - name: discord
+    discord_configs:
+      - webhook_url: '__DISCORD_WEBHOOK_URL__'
+        send_resolved: true
+        title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }} ({{ .CommonLabels.severity }})'
+        message: '{{ range .Alerts }}{{ .Annotations.summary }} - {{ .Annotations.description }}{{ "\n" }}{{ end }}'
+
+# Don't also page "slow" when the service is completely down
+inhibit_rules:
+  - source_matchers: ['alertname="OnTrackDown"']
+    target_matchers: ['alertname="OnTrackSlowResponses"']
+    equal: [env]

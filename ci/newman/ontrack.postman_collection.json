@@ -1,0 +1,454 @@
+{
+  "info": {
+    "name": "OnTrack API - pipeline tests",
+    "description": "Smoke = read-only checks safe for production. CRUD = full create/read/update/delete cycle on campuses, run against staging.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Smoke",
+      "item": [
+        {
+          "name": "Health - settings endpoint",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "settings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('responds in < 2s', () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+                  "pm.test('returns product settings', () => pm.expect(pm.response.json()).to.have.property('externalName'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Auth method is database",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/method",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "method"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Public campus list",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/campuses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campuses"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('is an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Protected endpoint rejects anonymous user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/campuses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campuses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campus\": {\n    \"name\": \"should-fail\",\n    \"mode\": \"automatic\",\n    \"abbreviation\": \"XX\",\n    \"active\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('not 2xx without a token', () => pm.expect(pm.response.code).to.be.oneOf([401, 403, 419]));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CRUD",
+      "item": [
+        {
+          "name": "Sign in as admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"remember\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('signed in', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const body = pm.response.json();",
+                  "pm.test('token returned', () => pm.expect(body.auth_token).to.be.a('string'));",
+                  "pm.collectionVariables.set('authToken', body.auth_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create campus",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Auth-Token",
+                "value": "{{authToken}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/campuses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campuses"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campus\": {\n    \"name\": \"{{campusName}}\",\n    \"mode\": \"automatic\",\n    \"abbreviation\": \"{{campusAbbr}}\",\n    \"active\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const stamp = Date.now();",
+                  "pm.collectionVariables.set('campusName', 'CI Campus ' + stamp);",
+                  "pm.collectionVariables.set('campusAbbr', 'CI' + String(stamp).slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('created', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const c = pm.response.json();",
+                  "pm.test('has id and name', () => { pm.expect(c.id).to.be.a('number'); pm.expect(c.name).to.eql(pm.collectionVariables.get('campusName')); });",
+                  "pm.collectionVariables.set('campusId', c.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read campus",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/campuses/{{campusId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campuses",
+                "{{campusId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('same campus', () => pm.expect(pm.response.json().name).to.eql(pm.collectionVariables.get('campusName')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update campus",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Auth-Token",
+                "value": "{{authToken}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/campuses/{{campusId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campuses",
+                "{{campusId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campus\": {\n    \"name\": \"{{campusName}} (updated)\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('name updated', () => pm.expect(pm.response.json().name).to.eql(pm.collectionVariables.get('campusName') + ' (updated)'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete campus",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Auth-Token",
+                "value": "{{authToken}}"
+              },
+              {
+                "key": "Username",
+                "value": "{{username}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/campuses/{{campusId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campuses",
+                "{{campusId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deleted campus is gone",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/campuses/{{campusId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "campuses",
+                "{{campusId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 after delete', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "key": "campusId",
+      "value": ""
+    },
+    {
+      "key": "campusName",
+      "value": ""
+    },
+    {
+      "key": "campusAbbr",
+      "value": ""
+    }
+  ]
+}

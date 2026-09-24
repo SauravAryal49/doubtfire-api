@@ -81,6 +81,7 @@ GEM
     aes_key_wrap (1.1.0)
     afm (0.2.2)
     amq-protocol (2.3.2)
+    ansi (1.6.0)
     ast (2.4.2)
     backport (1.2.0)
     base64 (0.2.0)
@@ -168,6 +169,7 @@ GEM
     faraday-net_http (3.1.0)
       net-http
     ffi (1.17.0-aarch64-linux-gnu)
+    ffi (1.17.0-x86_64-linux-gnu)
     fugit (1.11.0)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
@@ -239,6 +241,11 @@ GEM
     minitest-rails (7.1.0)
       minitest (~> 5.20)
       railties (~> 7.1.0)
+    minitest-reporters (1.8.0)
+      ansi
+      builder
+      minitest (>= 5.0, < 7)
+      ruby-progressbar
     moss_ruby (1.1.4)
       tcp_timeout (~> 0.1.1)
     msgpack (1.7.2)
@@ -264,6 +271,8 @@ GEM
     netrc (0.11.0)
     nio4r (2.7.3)
     nokogiri (1.16.5-aarch64-linux)
+      racc (~> 1.4)
+    nokogiri (1.16.5-x86_64-linux)
       racc (~> 1.4)
     observer (0.1.2)
     orm_adapter (0.5.0)
@@ -427,6 +436,9 @@ GEM
       docile (~> 1.1)
       simplecov-html (~> 0.11)
       simplecov_json_formatter (~> 0.1)
+    simplecov-cobertura (3.2.0)
+      rexml
+      simplecov (~> 0.19)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
     solargraph (0.50.0)
@@ -490,6 +502,7 @@ GEM
 
 PLATFORMS
   aarch64-linux
+  x86_64-linux
 
 DEPENDENCIES
   better_errors
@@ -516,6 +529,7 @@ DEPENDENCIES
   minitest
   minitest-around
   minitest-rails
+  minitest-reporters
   moss_ruby (>= 1.1.4)
   mysql2
   net-smtp
@@ -542,6 +556,7 @@ DEPENDENCIES
   sidekiq
   sidekiq-cron
   simplecov
+  simplecov-cobertura
   solargraph
   sprockets-rails
   tca_client (= 1.0.4)
@@ -551,4 +566,4 @@ RUBY VERSION
    ruby 3.1.4p223
 
 BUNDLED WITH
-   2.4.15
+   2.4.5

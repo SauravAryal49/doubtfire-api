@@ -1,4 +1,10 @@
 require 'simplecov'
+if ENV['CI']
+  # Jenkins: separate result set per suite (merged later) + Cobertura XML
+  require 'simplecov-cobertura'
+  SimpleCov.command_name "minitest-#{ENV.fetch('TEST_SUITE', 'all')}"
+  SimpleCov.formatters = [SimpleCov::Formatter::HTMLFormatter, SimpleCov::Formatter::CoberturaFormatter]
+end
 SimpleCov.start 'rails'
 
 # Setup RAILS_ENV as test and expand config for test environment
@@ -34,6 +40,15 @@ require 'minitest/pride'
 require 'minitest/around'
 
 require 'webmock/minitest'
+
+# Jenkins: JUnit XML so the pipeline can show per-test results and trends
+if ENV['CI']
+  require 'minitest/reporters'
+  Minitest::Reporters.use! [
+    Minitest::Reporters::DefaultReporter.new(color: false),
+    Minitest::Reporters::JUnitReporter.new('test-reports')
+  ]
+end
 
 # Require all test helpers
 require_all 'test/helpers'

@@ -1,0 +1,80 @@
+groups:
+  - name: ontrack-availability
+    rules:
+      - alert: OnTrackDown
+        expr: probe_success{job="blackbox-http", env="production"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "OnTrack production is DOWN"
+          description: "Health check {{ $labels.instance }} has failed for more than 1 minute. Users cannot log in or submit work."
+
+      - alert: OnTrackStagingDown
+        expr: probe_success{job="blackbox-http", env="staging"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OnTrack staging is down"
+          description: "Staging health check has failed for 5 minutes; releases are blocked."
+
+      - alert: OnTrackSlowResponses
+        expr: probe_duration_seconds{job="blackbox-http", env="production"} > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OnTrack production responses are slow"
+          description: "Health endpoint takes {{ $value | humanizeDuration }} (threshold 2s) for over 2 minutes."
+
+  - name: ontrack-traffic
+    rules:
+      - alert: PossibleDDoS
+        expr: sum(rate(nginx_http_requests_total{env="production"}[1m])) > 50
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Abnormal request rate - possible DDoS"
+          description: "Production is receiving {{ $value | humanize }} req/s (normal < 5 req/s, alert > 50 req/s). nginx rate limiting (20 r/s per IP) is active."
+
+      - alert: HighActiveConnections
+        expr: nginx_connections_active{env="production"} > 100
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of open connections"
+          description: "{{ $value }} active connections on production nginx."
+
+      - alert: NginxMetricsDown
+        expr: nginx_up == 0 or up{job="nginx"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "nginx metrics unavailable"
+          description: "The nginx exporter cannot read stub_status from production."
+
+  - name: ontrack-resources
+    rules:
+      - alert: ContainerHighCPU
+        expr: sum by (name) (rate(container_cpu_usage_seconds_total{name=~"ontrack-production-.*"}[1m])) * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU on {{ $labels.name }}"
+          description: "{{ $labels.name }} is using {{ $value | humanize }}% CPU for over 2 minutes."
+
+      - alert: ContainerHighMemory
+        expr: |
+          container_memory_working_set_bytes{name="ontrack-production-api-1"}
+            / container_spec_memory_limit_bytes{name="ontrack-production-api-1"} > 0.9
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OnTrack API near its memory limit"
+          description: "API container is at {{ $value | humanizePercentage }} of its memory limit; risk of OOM kill."

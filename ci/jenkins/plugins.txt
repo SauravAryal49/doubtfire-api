@@ -1,0 +1,13 @@
+workflow-aggregator
+git
+github
+github-branch-source
+pipeline-stage-view
+pipeline-graph-view
+credentials-binding
+timestamper
+ansicolor
+junit
+coverage
+warnings-ng
+sonar
