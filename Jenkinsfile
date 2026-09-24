@@ -16,11 +16,6 @@ pipeline {
     disableConcurrentBuilds()
   }
 
-  triggers {
-    // GitHub webhook is preferred; polling is the fallback for a laptop behind NAT
-    pollSCM('H/5 * * * *')
-  }
-
   parameters {
     choice(name: 'SIMULATE_INCIDENT', choices: ['none', 'outage', 'load', 'cpu'],
            description: 'After release, trigger a real incident to prove alerting works')

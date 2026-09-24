@@ -30,8 +30,10 @@ trivy image --cache-dir "$TRIVY_CACHE" --skip-db-update --scanners vuln \
   --severity HIGH,CRITICAL --format table -o "$OUT/trivy-image.txt" "$IMAGE"
 jq -r '[.Results[]?.Vulnerabilities[]?] | group_by(.Severity)
        | map("\(.[0].Severity): \(length)") | .[]' "$OUT/trivy-image.json" | tee "$OUT/trivy-severity-counts.txt"
+echo "    Gate check: CRITICAL with a fix available, not in .trivyignore:"
 if ! trivy image --cache-dir "$TRIVY_CACHE" --skip-db-update --scanners vuln -q \
-      --severity CRITICAL --ignore-unfixed --ignorefile .trivyignore --exit-code 1 "$IMAGE" > /dev/null; then
+      --severity CRITICAL --ignore-unfixed --ignorefile .trivyignore --exit-code 1 \
+      --format table "$IMAGE" | tee "$OUT/trivy-gate.txt"; then
   echo "!! Trivy gate failed: fixable CRITICAL vulnerabilities (see trivy-image.txt)"
   FAIL=1
 fi
