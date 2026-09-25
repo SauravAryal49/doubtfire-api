@@ -17,7 +17,7 @@ api qualitygates/create --data-urlencode "name=$GATE" || echo "(exists)"
 #   duplicated lines > 3%     -> fail
 #   maintainability rating worse than A -> fail
 #   reliability rating worse than A     -> fail
-#   security hotspots reviewed < 100%   -> fail
+#   security rating worse than A        -> fail
 add() { api qualitygates/create_condition --data-urlencode "gateName=$GATE" -d "metric=$1" -d "op=$2" -d "error=$3" || true; }
 add new_coverage                  LT 70
 add new_duplicated_lines_density  GT 3
